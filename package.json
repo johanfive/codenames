@@ -39,7 +39,7 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://github.com/johanfive/codenames",
+  "homepage": "https://johanfive.github.io/codenames",
   "devDependencies": {
     "gh-pages": "^2.2.0"
   }
