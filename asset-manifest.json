@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/johanfive/codenames/static/css/main.d287e15c.chunk.css",
+    "main.js": "/johanfive/codenames/static/js/main.50041a4b.chunk.js",
+    "main.js.map": "/johanfive/codenames/static/js/main.50041a4b.chunk.js.map",
+    "runtime-main.js": "/johanfive/codenames/static/js/runtime-main.96bad3b4.js",
+    "runtime-main.js.map": "/johanfive/codenames/static/js/runtime-main.96bad3b4.js.map",
+    "static/js/2.02fa2edc.chunk.js": "/johanfive/codenames/static/js/2.02fa2edc.chunk.js",
+    "static/js/2.02fa2edc.chunk.js.map": "/johanfive/codenames/static/js/2.02fa2edc.chunk.js.map",
+    "index.html": "/johanfive/codenames/index.html",
+    "precache-manifest.ff93c79a706b35dfa2303fa9f12210de.js": "/johanfive/codenames/precache-manifest.ff93c79a706b35dfa2303fa9f12210de.js",
+    "service-worker.js": "/johanfive/codenames/service-worker.js",
+    "static/css/main.d287e15c.chunk.css.map": "/johanfive/codenames/static/css/main.d287e15c.chunk.css.map",
+    "static/js/2.02fa2edc.chunk.js.LICENSE.txt": "/johanfive/codenames/static/js/2.02fa2edc.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.96bad3b4.js",
+    "static/js/2.02fa2edc.chunk.js",
+    "static/css/main.d287e15c.chunk.css",
+    "static/js/main.50041a4b.chunk.js"
+  ]
+}
