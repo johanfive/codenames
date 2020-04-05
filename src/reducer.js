@@ -1,4 +1,5 @@
 import words from './words';
+import { teams, ASSASSIN, UNFLIPPED, NEUTRAL, actionTypes } from './constants';
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));
 
@@ -19,19 +20,19 @@ const getUnselectedRandom = (selection, max) => {
   return i;
 }
 
-const shuffleTiles = () => {
+const shuffleTiles = (tilesCount) => {
   const tiles = [];
-  const assassinId = getRandomInt(25); // ass placed differently because it would almost always be on the 1st row otherwise
+  const assassinId = getRandomInt(tilesCount); // ass placed differently because it would almost always be on the 1st row otherwise
   const toDistribute = {
-    values: ['teamA', 'teamB', 'neutral'], // these guys have similar enough odds that this strategy makes sense
-    'teamA': 9,
-    'teamB': 8,
-    'neutral': 7
+    values: [teams.A, teams.B, NEUTRAL], // these guys have similar enough odds that this strategy makes sense
+    [teams.A]: 9,
+    [teams.B]: 8,
+    [NEUTRAL]: 7
   };
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < tilesCount; i++) {
     const wordIndex = getUnselectedRandom(tiles.map(tile => tile.id), words.length);
     const tileValue = i === assassinId
-      ? 'assassin'
+      ? ASSASSIN
       : toDistribute.values[getRandomInt(toDistribute.values.length)];
     if (toDistribute[tileValue] > 0) {
       toDistribute[tileValue]--;
@@ -41,12 +42,12 @@ const shuffleTiles = () => {
     }
     tiles.push({ id: wordIndex , word: words[wordIndex], value: tileValue });
   }
-  return tiles.map(tile => ({ word: tile.word, value: tile.value, color: 'unflipped' }));
+  return tiles.map(tile => ({ word: tile.word, value: tile.value, color: UNFLIPPED }));
 };
 
 
 const reset = () => ({
-  tiles: shuffleTiles(),
+  tiles: shuffleTiles(25),
   teamAscore: 0,
   teamBscore: 0,
   spy: false
@@ -55,7 +56,7 @@ export const initialState = reset();
 
 export default (state, action) => {
   switch (action.type) {
-    case 'flip':
+    case actionTypes.FLIP:
       const flippedTile = { ...state.tiles[action.id] };
       flippedTile.color = flippedTile.value;
       let newState = {
@@ -64,19 +65,19 @@ export default (state, action) => {
       };
       newState.tiles.push(flippedTile);
       newState.tiles = newState.tiles.concat(state.tiles.slice(action.id + 1));
-      if (flippedTile.color === 'teamA') {
+      if (flippedTile.color === teams.A) {
         newState.teamAscore = state.teamAscore + 1;
       }
-      if (flippedTile.color === 'teamB') {
+      if (flippedTile.color === teams.B) {
         newState.teamBscore = state.teamBscore + 1;
       }
-      if (flippedTile.color === 'assassin') {
+      if (flippedTile.color === ASSASSIN) {
         newState.tiles = state.tiles.map(tile => ({ ...tile, color: tile.value }));
       }
       return newState;
-    case 'reset':
+    case actionTypes.RESET:
       return reset();
-    case 'toggleSpy':
+    case actionTypes.TOGGLE_SPY:
       return { ...state, spy: !state.spy };
     default:
       return state;

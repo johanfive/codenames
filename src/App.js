@@ -1,11 +1,8 @@
 import React, { useReducer } from 'react';
 import reducer, { initialState } from './reducer';
+import { teams, scoreToWin, actionTypes } from './constants';
 import './App.css';
 
-const scoreToWin = {
-  teamA: 9,
-  teamB: 8
-}
 
 const Tile = ({ id, color, word, handleClick, value, spy }) => {
   const flipped = color === value;
@@ -37,11 +34,11 @@ const Row = ({ rowI, columns, handleClick, spy }) => {
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { tiles } = state;
+  const { tiles, teamAscore, teamBscore } = state;
   const handleClick = id => {
     const flippedTile = tiles[id];
     if (flippedTile.color !== flippedTile.value) {
-      dispatch({ type: 'flip', id });
+      dispatch({ type: actionTypes.FLIP, id });
     }
   };
   const rowsCountAndLength = Math.sqrt(tiles.length);
@@ -54,19 +51,22 @@ const App = () => {
     rows.push(<Row key={i} rowI={i} columns={rowData} handleClick={handleClick} spy={state.spy} />);
   }
   let winningTeam = '';
-  if (state.teamAscore === scoreToWin.teamA) {
-    winningTeam = 'teamA';
+  if (teamAscore === scoreToWin.teamA) {
+    winningTeam = teams.A;
   }
-  if (state.teamBscore === scoreToWin.teamB) {
-    winningTeam = 'teamB';
+  if (teamBscore === scoreToWin.teamB) {
+    winningTeam = teams.B;
   }
   return (
     <>
-      <div>teamA: {state.teamAscore}/{scoreToWin.teamA} | teamB: {state.teamBscore}/{scoreToWin.teamB}</div>
-      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+      <div>
+        {teams.A}: {teamAscore}/{scoreToWin.teamA} |
+        {teams.B}: {teamBscore}/{scoreToWin.teamB}
+      </div>
+      <button onClick={() => dispatch({ type: actionTypes.RESET })}>Reset</button>
       <button
-        onMouseDown={() => dispatch({ type: 'toggleSpy' })}
-        onMouseUp={() => dispatch({ type: 'toggleSpy' })}
+        onMouseDown={() => dispatch({ type: actionTypes.TOGGLE_SPY })}
+        onMouseUp={() => dispatch({ type: actionTypes.TOGGLE_SPY })}
       >
         Spy Master check
       </button>

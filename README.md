@@ -1,4 +1,4 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[Play Codenames](https://johanfive.github.io/codenames/)
 
 # Codenames in React
 For blips & giggles while we're all working remotely due to covid-19.
