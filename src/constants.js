@@ -11,9 +11,3 @@ export const scoreToWin = {
   [teams.A]: 9,
   [teams.B]: 8
 }
-
-export const actionTypes = {
-  FLIP: 'flip',
-  RESET: 'reset',
-  TOGGLE_SPY: 'toggleSpy'
-};

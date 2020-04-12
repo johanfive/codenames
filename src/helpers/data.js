@@ -1,5 +1,6 @@
 import words from './words';
-import { teams, ASSASSIN, UNFLIPPED, NEUTRAL, actionTypes } from './constants';
+import { teams, scoreToWin, ASSASSIN, UNFLIPPED, NEUTRAL } from '../constants';
+
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));
 
@@ -20,13 +21,13 @@ const getUnselectedRandom = (selection, max) => {
   return i;
 }
 
-const shuffleTiles = (tilesCount) => {
+export const shuffleTiles = (tilesCount) => {
   const tiles = [];
   const assassinId = getRandomInt(tilesCount); // ass placed differently because it would almost always be on the 1st row otherwise
   const toDistribute = {
     values: [teams.A, teams.B, NEUTRAL], // these guys have similar enough odds that this strategy makes sense
-    [teams.A]: 9,
-    [teams.B]: 8,
+    [teams.A]: scoreToWin[teams.A],
+    [teams.B]: scoreToWin[teams.B],
     [NEUTRAL]: 7
   };
   for (let i = 0; i < tilesCount; i++) {
@@ -45,41 +46,16 @@ const shuffleTiles = (tilesCount) => {
   return tiles.map(tile => ({ word: tile.word, value: tile.value, color: UNFLIPPED }));
 };
 
-
-const reset = () => ({
-  tiles: shuffleTiles(25),
-  teamAscore: 0,
-  teamBscore: 0,
-  spy: false
-});
-export const initialState = reset();
-
-export default (state, action) => {
-  switch (action.type) {
-    case actionTypes.FLIP:
-      const flippedTile = { ...state.tiles[action.id] };
-      flippedTile.color = flippedTile.value;
-      let newState = {
-        ...state,
-        tiles: state.tiles.slice(0, action.id),
-      };
-      newState.tiles.push(flippedTile);
-      newState.tiles = newState.tiles.concat(state.tiles.slice(action.id + 1));
-      if (flippedTile.color === teams.A) {
-        newState.teamAscore = state.teamAscore + 1;
-      }
-      if (flippedTile.color === teams.B) {
-        newState.teamBscore = state.teamBscore + 1;
-      }
-      if (flippedTile.color === ASSASSIN) {
-        newState.tiles = state.tiles.map(tile => ({ ...tile, color: tile.value }));
-      }
-      return newState;
-    case actionTypes.RESET:
-      return reset();
-    case actionTypes.TOGGLE_SPY:
-      return { ...state, spy: !state.spy };
-    default:
-      return state;
+export const arraysOfSameValues = (arrA, arrB) => {
+  if (!Array.isArray(arrA) || ! Array.isArray(arrB) || arrA.length !== arrB.length) {
+    return false;
   }
-};
+  const arr1 = arrA.concat().sort();
+  const arr2 = arrB.concat().sort();
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
