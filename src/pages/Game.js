@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { teams, NEUTRAL } from '../constants';
+import { useParams, Link } from 'react-router-dom';
+import { teams, NEUTRAL, defaultPlayer } from '../constants';
 import Score from '../components/Score';
 import Tile from '../components/Tile';
 import TeamList from '../components/TeamList';
-import SpyDibs from '../components/SpyDibs';
-import Timer from '../components/Timer';
 import { auth, db } from '../services/firebase';
 import '../App.css';
 
@@ -28,7 +26,17 @@ const Game = () => {
     const gameRef = db.ref(`/activeGames/${gameId}`);
     const userRef = gameRef.child(`/users/${user.uid}`);
     const tilesRef = gameRef.child('/tiles');
-    userRef.on('value', snap => setPlayer(snap.val()));
+    userRef.on('value', snap => {
+      if (snap.exists()) {
+        setPlayer(snap.val());
+      } else {
+        // consider making a function setNewPlayer(gameRef, authCurrentUser) {}
+        const updates = {};
+        updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
+        updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
+        gameRef.update(updates);
+      }
+    });
     tilesRef.once('value')
       .then(snap => {
         const data = snap.val();
@@ -51,21 +59,28 @@ const Game = () => {
     rows.push(<Row key={i} gameId={gameId} columns={rowData} player={player} />);
   }
   const teamsLists = [teams.A, teams.B, NEUTRAL].map(
-    (team, i) => <TeamList key={i} gameId={gameId} currentTeam={player.team} teamToJoin={team} />
+    (team, i) => <TeamList key={i} gameId={gameId} player={player} teamToJoin={team} />
   );
+
+  const copy = () => {
+    document.getElementById('copy').select();
+    document.execCommand('copy');
+  }
 
   if (error) {
     return <div><h1>Something went terribly wrong</h1><div>{error}</div></div>;
   } else {
     return loading ? <h1>Loading...</h1> : (
       <>
-        <h1>{gameId}</h1>
-        <Score gameId={gameId} />{player && <SpyDibs gameId={gameId} player={player} />}
+        <Link to="/">Lobby</Link>
+        <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+          <div><input id="copy" value={gameId} readOnly /><button onClick={copy}>Copy</button></div>
+          <Score gameId={gameId} />
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
           <div>{teamsLists}</div>
           <div className="board">{rows}</div>
         </div>
-        <Timer />
           {/* <button onClick={() => dispatch({ type: actionTypes.RESET })}>Reset</button> */}
       </>
     );

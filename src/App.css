@@ -1,6 +1,63 @@
+html {
+  background-color: #f9f9f9;
+  color: #535353;
+  font-family: 'Roboto', sans-serif;
+}
+
+::selection {
+  color: honeydew;
+  background: hotpink;
+}
+
+* {
+  border-radius: 2px;
+}
+
+a {
+  margin: 5rem;
+  padding: .5rem;
+  text-decoration: none;
+}
+
+button, a {
+  border: 1px solid #999999;
+  background-color: inherit;
+  color: inherit;
+}
+button:hover, a:hover {
+  border: 1px solid #535353;
+  background-color: inherit;
+  color: deeppink;
+}
+
+.join {
+  width: 3rem;
+  height: 3rem;
+  border: 0;
+  padding: 1px;
+}
+.join:hover {
+  border: 1px solid #999999;
+}
+
+input {
+  background-color: inherit;
+  border: 0;
+  padding: .25rem;
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+  text-align: center;
+  width: 13.5rem;
+}
+input:hover, input:active {
+  border: 1px solid #999999;
+}
+
+
 .board {
-  width: 35rem;
-  height: 35rem;
+  width: 41rem;
+  height: 41rem;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -9,23 +66,28 @@
 .row {
   display: flex;
   justify-content: space-evenly;
-  height: 6.5rem;
+  height: 7.5rem;
 }
 
 .tile {
-  width: 6.5rem;
+  width: 7.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
   box-sizing: border-box;
+  letter-spacing: 1px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bolder;
 }
 .tile:hover {
   border: 1px solid black;
+  color: white;
 }
 
 .unflipped {
-  background-color: honeydew;
+  background-color: #d5d5d5;
 }
 .teamA {
   background-color: #61dafb;
@@ -34,11 +96,11 @@
   background-color: crimson;
 }
 .neutral {
-  background-color: gray;
+  background-color: rgb(48, 218, 32);
 }
 .assassin {
-  background-color: greenyellow;
+  background-color: gray;
 }
 .spy {
-  border: 5px solid black;
+  border: 5px solid orange;
 }

@@ -12,7 +12,7 @@ export default ({ gameId, team }) => {
   const isMasterRef = gameRef.child(`users/${user.uid}/isMaster`);
 
   const handleChange = e => {
-    const valid = /^(?!\s.*$).*/;
+    const valid = /^\S.{0,25}$/;
     const newName = e.target.value;
     if (newName && valid.test(newName)) {
       teamNameRef.set(newName);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { teams, scoreToWin } from '../constants';
+import { teams, scoreToWin, colors } from '../constants';
 import TeamName from './TeamName';
+import Timer from './Timer';
 
 
 export default ({ gameId }) => {
@@ -25,10 +26,23 @@ export default ({ gameId }) => {
     return () => tilesRef.off();
   }, [gameId]);
   return (
-    <div>
-      <TeamName gameId={gameId} team={teams.A} />: {score.teamA} / {scoreToWin[teams.A]}
-      &nbsp;|&nbsp; 
-      <TeamName gameId={gameId} team={teams.B} />: {score.teamB} / {scoreToWin[teams.B]}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'stretch',
+      width: '41rem',
+      border: '1px solid #999999',
+      padding: '1rem'
+    }}>
+      <div style={{ width: '14rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center' }}>
+        <TeamName gameId={gameId} team={teams.A} />
+        <div><span style={{ color: score.teamA > 0 ? colors[teams.A] : '', fontWeight: 'bolder' }}>{score.teamA}</span> / {scoreToWin[teams.A]}</div>
+      </div>
+      <Timer />
+      <div style={{ width: '14rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center' }}>
+        <TeamName gameId={gameId} team={teams.B} />
+        <div><span style={{ color: score.teamB > 0 ? colors[teams.B] : '', fontWeight: 'bolder' }}>{score.teamB}</span> / {scoreToWin[teams.B]}</div>
+      </div>
     </div>
   );
 };

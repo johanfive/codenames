@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { signinWithGoogle } from '../helpers/auth';
+import React, { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
 
-export default () => {
-  const [error, setError] = useState(null);
+export default ({ authed }) => {  
   const history = useHistory();
-  const location = useLocation();
-  let { from } = location.state || { from: { pathname: "/" } };
-  const handleGoogleSignin = () => signinWithGoogle()
-    .then(() => history.replace(from))
-    .catch(e => setError(e.message));
+  const { location } = history;
+  const { state = {} } = location;
+  const fromGame = state.from && state.from.pathname.slice(0, 5) === '/game';
+
+  useEffect(() => {
+    if (authed) {
+      history.push(state.from || '/');
+    }
+  }, [authed, history, state]);
 
   return (
-    <>
-      <h2>Login with Google to access {from.pathname}</h2>
-      <button onClick={handleGoogleSignin}>Let's do it</button>
-      {error && <div>You cannot log in: {error}</div>}
-    </>
+    <div>
+      <h1>C L U E F U L</h1>
+      <p>Because being clueless is just awful ¯\_(ツ)_/¯</p>
+      {fromGame && <div>You will be redirected once you have logged in</div>}
+    </div>
   );
 };

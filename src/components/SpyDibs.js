@@ -22,6 +22,7 @@ export default ({ gameId, player }) => {
         .then((transactionResult) => {
           if (transactionResult.committed) {
             userIsMasterRef.set(true);
+            // TODO add (M) to the displayName of the the teamMaster
           }
         })
         .catch(e => console.error(e.message));
@@ -46,5 +47,5 @@ export default ({ gameId, player }) => {
 
   const showSpyDibs = player.team !== NEUTRAL && !player.isMaster && !teamMaster;
 
-  return showSpyDibs ? <button onClick={handleClick}>Call me Master</button> : null;
+  return showSpyDibs ? <button className="join" onClick={handleClick}>Master</button> : null;
 };

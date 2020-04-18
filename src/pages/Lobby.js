@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { auth, db } from '../services/firebase';
 import { shuffleTiles } from '../helpers/data';
-import { teams, NEUTRAL } from '../constants';
+import { teams, NEUTRAL, defaultPlayer } from '../constants';
 
 
 export default () => {
@@ -31,7 +31,7 @@ export default () => {
           if (isNewPlayer) {
             const updates = {};
             updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
-            updates[`/users/${user.uid}`] = { displayName: user.displayName, isMaster: false, team: NEUTRAL };
+            updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
             gameRef.update(updates)
               .then(() => joinGame(joinId));
           } else {
@@ -66,15 +66,49 @@ export default () => {
   }
 
   return (
-    <>
-      <label htmlFor="existing">Join existing game:</label>
-      <input name="existing" onChange={handleChange} placeholder="Game key" />
-      <button onClick={handleClick}>
-        {loading ? 'loading...' : 'Join'}
-      </button>
-      <hr />
-      <button onClick={handleCreate}>Create New</button>
-      {error && <div>{error}</div>}
-    </>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+      padding: '1rem'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        border: '1px solid #999999',
+        padding: '1rem'
+      }}>
+        <label htmlFor="existing">Join existing game:</label>
+        <div style={{ display:'flex', marginLeft: '0.5rem' }}>
+          <input
+            style={{
+              border: '1px solid #999999',
+              background: 'inherit',
+              font: 'inherit',
+              padding: '.2rem',
+              paddingLeft: '.5rem',
+              width: '12rem'
+            }}
+            name="existing"
+            onChange={handleChange}
+            placeholder="Game key"
+          />
+          <button onClick={handleClick}>
+            {loading ? 'loading...' : 'Join'}
+          </button>
+        </div>
+        {error && <div>{error}</div>}
+      </div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        padding: '1rem'
+      }}>
+        <button style={{ width: '5rem', height: '5rem' }} onClick={handleCreate}>Create New</button>
+      </div>
+    </div>
   );
 };
