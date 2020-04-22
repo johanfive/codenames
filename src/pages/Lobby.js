@@ -59,8 +59,9 @@ export default () => {
     updates[`/${teams.A}/name`] = 'Team that goes 1st';
     updates[`/${teams.B}/name`] = 'The other team...?';
     updates[`/${NEUTRAL}`] = { name: 'Audience', members: { [user.uid]: user.displayName || 'Cap Annonymous' } };
-    updates[`/users/${user.uid}`] = { displayName: user.displayName, isMaster: false, team: NEUTRAL };
+    updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
     newGameRef.update(updates)
+      .then(() => db.ref().child(`users/${user.uid}/createCount`).transaction(current => current ? (current + 1) : 1))
       .then(() => joinGame(gameId))
       .catch(e => setError(e.message));
   }

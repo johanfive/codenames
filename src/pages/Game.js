@@ -7,6 +7,14 @@ import TeamList from '../components/TeamList';
 import { auth, db } from '../services/firebase';
 import '../App.css';
 
+const authUserJoinsGame = (gameId) => {
+  const gameRef = db.ref(`/activeGames/${gameId}`);
+  const user = auth().currentUser;
+  const updates = {};
+  updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
+  updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
+  return gameRef.update(updates);
+};
 
 const Row = ({ gameId, columns, player }) => (
   <div className="row">
@@ -30,11 +38,7 @@ const Game = () => {
       if (snap.exists()) {
         setPlayer(snap.val());
       } else {
-        // consider making a function setNewPlayer(gameRef, authCurrentUser) {}
-        const updates = {};
-        updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
-        updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
-        gameRef.update(updates);
+        authUserJoinsGame(gameId);
       }
     });
     tilesRef.once('value')
@@ -63,8 +67,13 @@ const Game = () => {
   );
 
   const copy = () => {
-    document.getElementById('copy').select();
-    document.execCommand('copy');
+    navigator.clipboard.writeText(window.location.href)
+    .then(() => {
+      console.log('URL copied to clipboard');
+    })
+    .catch(e => {
+      console.error('Could not copy URL', e);
+    });
   }
 
   if (error) {
@@ -74,7 +83,7 @@ const Game = () => {
       <>
         <Link to="/">Lobby</Link>
         <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
-          <div><input id="copy" value={gameId} readOnly /><button onClick={copy}>Copy</button></div>
+          <div><button onClick={copy}>Get Invite Link</button></div>
           <Score gameId={gameId} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
