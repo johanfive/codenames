@@ -1,52 +1,20 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { auth, db } from '../services/firebase';
-import { shuffleTiles } from '../helpers/data';
-import { teams, NEUTRAL, defaultPlayer } from '../constants';
+import { shuffleTiles, before2daysAgo } from '../helpers/data';
+import { teams, NEUTRAL, defaultPlayer, teamNames } from '../constants';
+import { incrementUserGamesCreated } from '../dbStuff/setters';
 
 
 export default () => {
-  const [ loading, setLoading ] = useState(false);
-  const [ error, setError ] = useState(null);
-  const [ joinId, setJoinId ] = useState('');
-  
+  const [ state, setState ] = useState({ loading: false, error: null });
   const history = useHistory();
+  const user = auth().currentUser;
+
   const joinGame = gameId => history.push(`/game/${gameId}`);
 
-  const handleChange = e => setJoinId(e.target.value);
-
-  const handleClick = () => {
-    const user = auth().currentUser;
-    const gameRef = db.ref(`activeGames/${joinId}`);
-    const playersRef = gameRef.child(`/users`);
-    playersRef.once('value')
-      .then(snap => {
-        if (snap.exists()) {
-          let isNewPlayer = true;
-          snap.forEach(playerSnap => {
-            if (playerSnap.key === user.uid) {
-              isNewPlayer = false;
-            }
-          });
-          if (isNewPlayer) {
-            const updates = {};
-            updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
-            updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
-            gameRef.update(updates)
-              .then(() => joinGame(joinId));
-          } else {
-            joinGame(joinId);
-          }
-        } else {
-          setError('No ongoing game matches the key you provided');
-        }
-      })
-      .catch(e => setError(e.message));
-  };
-
   const handleCreate = () => {
-    setLoading(true);
-    const user = auth().currentUser;
+    setState({ loading: true, error: null });
     const newGameRef = db.ref().child('activeGames').push();
     const gameId = newGameRef.key;
     const newGame = {};
@@ -54,17 +22,40 @@ export default () => {
       const tileKey = newGameRef.push().key;
       newGame[tileKey] = tile;
     });
-    const updates = {};
-    updates['/tiles'] = newGame;
-    updates[`/${teams.A}/name`] = 'Team that goes 1st';
-    updates[`/${teams.B}/name`] = 'The other team...?';
-    updates[`/${NEUTRAL}`] = { name: 'Audience', members: { [user.uid]: user.displayName || 'Cap Annonymous' } };
-    updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
-    newGameRef.update(updates)
-      .then(() => db.ref().child(`users/${user.uid}/createCount`).transaction(current => current ? (current + 1) : 1))
+    db.ref('/inactiveGames').once('value').then(snap => {
+      if (snap.exists()) {
+        const updates = {};
+        snap.forEach(daySnap => {
+          const ts = daySnap.key;
+          console.log(`TS: ${ts}`);
+          if (before2daysAgo(ts)) {
+            console.log('before2days ago');
+            const day = daySnap.val();
+            const gameIds = Object.keys(day).map(deletable => day[deletable]);
+            gameIds.forEach(gameToDelete => {
+              updates[`/activeGames/${gameToDelete}`] = null;
+            });
+            updates[`/inactiveGames/${ts}`] = null;
+          }
+        });
+        return db.ref().update(updates);
+      }
+    }).then(() => {
+      const updates = {};
+      updates['/tiles'] = newGame;
+      updates[`/${teams.A}/name`] = teamNames[teams.A];
+      updates[`/${teams.B}/name`] = teamNames[teams.B];
+      updates[`/${NEUTRAL}`] = { name: teamNames[NEUTRAL], members: { [user.uid]: user.displayName || 'Cap Annonymous' } };
+      updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
+      return newGameRef.update(updates);
+    }).then(incrementUserGamesCreated)
       .then(() => joinGame(gameId))
-      .catch(e => setError(e.message));
+      .catch(e => {
+        setState({ loading: false, error: e.message });
+      });
   }
+
+  const { loading, error } = state;
 
   return (
     <div style={{
@@ -74,42 +65,19 @@ export default () => {
       alignItems: 'center',
       padding: '1rem'
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-        border: '1px solid #999999',
-        padding: '1rem'
-      }}>
-        <label htmlFor="existing">Join existing game:</label>
-        <div style={{ display:'flex', marginLeft: '0.5rem' }}>
-          <input
-            style={{
-              border: '1px solid #999999',
-              background: 'inherit',
-              font: 'inherit',
-              padding: '.2rem',
-              paddingLeft: '.5rem',
-              width: '12rem'
-            }}
-            name="existing"
-            onChange={handleChange}
-            placeholder="Game key"
-          />
-          <button onClick={handleClick}>
-            {loading ? 'loading...' : 'Join'}
-          </button>
-        </div>
-        {error && <div>{error}</div>}
-      </div>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-        padding: '1rem'
-      }}>
-        <button style={{ width: '5rem', height: '5rem' }} onClick={handleCreate}>Create New</button>
-      </div>
+      <h1>Hi {user.displayName}!</h1>
+      <ol className="lobbyBlurb">
+        <li>Ask your friends if any of them has already created a game</li>
+        <li>If one of them has, ask for the invite link... and then click it</li>
+        <li>If none of them has, fight amongst yourselves and let the feistiest create a game</li>
+        <li>
+          If you turn out to be the glorious vanquisher of step 3, congrats, you get to push the big button.
+          Otherwise, please go back to step 1.
+        </li>
+        <li>Have fun!</li>
+      </ol>
+      {loading ? 'Loading...' : <button className="create" style={{ width: '5rem', height: '5rem' }} onClick={handleCreate}>Create New</button>}
+      {error}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import LoginButton from './components/LoginButton';
 import Login from './pages/Login';
 import Lobby from './pages/Lobby';
 import Game from './pages/Game';
+import './App.css';
 
 
 const ProtectedRoute = ({ authed, path, component: Component, ...rest }) => {

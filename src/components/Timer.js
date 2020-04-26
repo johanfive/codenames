@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const flexEven = { display: 'flex', justifyContent: 'space-evenly' };
-
 const displayTime = (millis) => {
   const seconds = Math.floor(millis / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -54,25 +52,20 @@ export default () => {
   };
   return (
     <div style={{ 
-      border: '1px solid lightgray',
       margin: '1rem',
       padding: '.5rem',
-      width: '8rem',
-      height: '3rem',
-      flexDirection: 'column',
-      ...flexEven
+      width: '20rem',
+      display: 'flex',
+      justifyContent: 'space-evenly',
+      alignItems: 'center'
     }}>
-      <div style={flexEven}>
-        <button onClick={increase}>+</button>
-        {displayTime(time)}
-        <button onClick={decrease}>-</button>
-      </div>
-      <div style={flexEven}>
-        <button onClick={handlePlayPause}>
-          {run ? 'Pause' : 'Start'}
-        </button>
-        <button onClick={reset}>Reset</button>
-      </div>
+      <button onClick={reset}>Reset</button>
+      <button onClick={decrease}>-</button>
+      {displayTime(time)}
+      <button onClick={increase}>+</button>
+      <button onClick={handlePlayPause}>
+        {run ? 'Pause' : 'Start'}
+      </button>
     </div>
   );
 };

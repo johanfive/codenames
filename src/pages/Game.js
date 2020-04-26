@@ -1,70 +1,78 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { teams, NEUTRAL, defaultPlayer } from '../constants';
-import Score from '../components/Score';
+import React, { useState, useEffect } from 'react';
+import { useParams, useHistory, Link } from 'react-router-dom';
+import { NEUTRAL, teams, scoreToWin, colors } from '../constants';
+import { onUserChange, onMineChange, onTeamScoreChange } from '../dbStuff/listeners';
+import { handleUserChange, handleMineChange, makeHandler } from '../dbStuff/handlers';
+import { getTilesIds } from '../dbStuff/getters';
+import Team from '../components/Team';
 import Tile from '../components/Tile';
-import TeamList from '../components/TeamList';
-import { auth, db } from '../services/firebase';
-import '../App.css';
+import Timer from '../components/Timer';
+import Vote from '../components/Vote';
 
-const authUserJoinsGame = (gameId) => {
-  const gameRef = db.ref(`/activeGames/${gameId}`);
-  const user = auth().currentUser;
-  const updates = {};
-  updates[`/${NEUTRAL}/members/${user.uid}`] = user.displayName || 'Cap Annonymous';
-  updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
-  return gameRef.update(updates);
+
+const Board = ({ gameId, tilesIds, player, score }) => {
+  return (
+    <div className="board">
+      {tilesIds.map(id => <Tile key={id} gameId={gameId} id={id} player={player} score={score} />)}
+    </div>
+  );
 };
 
-const Row = ({ gameId, columns, player }) => (
-  <div className="row">
-    {columns.map((tileId) => <Tile key={tileId} id={tileId} gameId={gameId} player={player} />)}
-  </div>
-);
+export default () => {
+  const [ tilesIds, setTilesIds ] = useState([]);
+  const [ player, setPlayer ] = useState({
+    team: NEUTRAL, isCaptain: false, displayName: 'Cap Annonymous'
+  });
+  const [ winners, setWinners ] = useState(null);
+  const [ teamAScore, setTeamAScore ] = useState(0);
+  const [ teamBScore, setTeamBScore ] = useState(0);
 
-const Game = () => {
-  const [ loading, setLoading ] = useState(true);
-  const [ error, setError ] = useState(null);
-  const [ player, setPlayer ] = useState({});
-  const [ tiles, setTiles ] = useState([]);
   const { gameId } = useParams();
+  const history = useHistory();
 
   useEffect(() => {
-    const user = auth().currentUser;
-    const gameRef = db.ref(`/activeGames/${gameId}`);
-    const userRef = gameRef.child(`/users/${user.uid}`);
-    const tilesRef = gameRef.child('/tiles');
-    userRef.on('value', snap => {
-      if (snap.exists()) {
-        setPlayer(snap.val());
-      } else {
-        authUserJoinsGame(gameId);
-      }
-    });
-    tilesRef.once('value')
+    getTilesIds(gameId)
       .then(snap => {
-        const data = snap.val();
-        setLoading(false);
-        setTiles(Object.keys(data));
+        if (snap.exists()) {
+          setTilesIds(Object.keys(snap.val()));
+        } else {
+          history.push(`/`);
+        }
       })
-      .catch(e => setError(e.message));
-    // return () => db.ref(`/activeGames/${gameId}`).set(null); // TODO need to call that function if current # of players === 0
-    // was thinking maybe the onDisconnect method would be good, but what if 1 user just leaves while others want to stay?
-    return () => userRef.off();
+      .catch(e => console.error(e));
+  }, [gameId, history]);
+
+  useEffect(() => {
+    const forgetUser = onUserChange(gameId, handleUserChange(setPlayer, gameId));
+    return () => forgetUser();
   }, [gameId]);
 
-  const rowsCountAndLength = Math.sqrt(tiles.length);
-  if (rowsCountAndLength && rowsCountAndLength !== Math.round(rowsCountAndLength)) {
-    throw new Error('Invalid number of tiles');
-  }
-  const rows = [];
-  for (let i = 0; i < tiles.length; i += rowsCountAndLength) {
-    const rowData = tiles.slice(i, i + rowsCountAndLength);
-    rows.push(<Row key={i} gameId={gameId} columns={rowData} player={player} />);
-  }
-  const teamsLists = [teams.A, teams.B, NEUTRAL].map(
-    (team, i) => <TeamList key={i} gameId={gameId} player={player} teamToJoin={team} />
-  );
+  useEffect(() => {
+    const forgetMineTeam = onMineChange(gameId, handleMineChange(setWinners));
+    const forgetTeamAScore = onTeamScoreChange(gameId, teams.A, makeHandler(setTeamAScore));
+    const forgetTeamBScore = onTeamScoreChange(gameId, teams.B, makeHandler(setTeamBScore));
+    return () => {
+      forgetMineTeam();
+      forgetTeamAScore();
+      forgetTeamBScore();
+    };
+  }, [gameId]);
+
+  useEffect(() => {
+    if (teamAScore === scoreToWin[teams.A]) {
+      setWinners(teams.A);
+    }
+    if (teamBScore === scoreToWin[teams.B]) {
+      setWinners(teams.B);
+    }
+  }, [teamAScore, teamBScore]);
+
+  useEffect(() => {
+    if (winners && !player.isCaptain) {
+      // game ends - give all players CapView (without making them team Caps per se)
+      setPlayer({ ...player, isCaptain: true });
+    }
+  }, [winners, player]);
 
   const copy = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -76,24 +84,23 @@ const Game = () => {
     });
   }
 
-  if (error) {
-    return <div><h1>Something went terribly wrong</h1><div>{error}</div></div>;
-  } else {
-    return loading ? <h1>Loading...</h1> : (
-      <>
-        <Link to="/">Lobby</Link>
-        <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
-          <div><button onClick={copy}>Get Invite Link</button></div>
-          <Score gameId={gameId} />
+  return (
+    <div>
+      <h1>C L U E F U L {winners && <span style={{ color: colors[winners]}}>Winners: {winners}</span>}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+        <div><Link to="/">Lobby</Link></div>
+        <div><button onClick={copy}>Get Invite Link</button></div>
+        <Timer />
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', width: '36rem', justifyContent: 'space-between' }}>
+          <Team team={teams.A} gameId={gameId} player={player} score={teamAScore} />
+          <Team team={teams.B} gameId={gameId} player={player} score={teamBScore} />
+          <Team team={NEUTRAL} gameId={gameId} player={player} />
+          <Vote gameId={gameId} player={player} score={{ [teams.A]: teamAScore, [teams.B]: teamBScore }} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-          <div>{teamsLists}</div>
-          <div className="board">{rows}</div>
-        </div>
-          {/* <button onClick={() => dispatch({ type: actionTypes.RESET })}>Reset</button> */}
-      </>
-    );
-  }
+        <Board gameId={gameId} tilesIds={tilesIds} player={player} />
+      </div>
+    </div>
+  );
 };
-
-export default Game;

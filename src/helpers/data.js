@@ -59,3 +59,25 @@ export const arraysOfSameValues = (arrA, arrB) => {
   }
   return true;
 }
+
+const minuitStamp = dateObj => {
+  dateObj.setHours(0);
+  dateObj.setMinutes(0);
+  dateObj.setSeconds(0);
+  dateObj.setMilliseconds(0);
+  return dateObj.getTime();
+};
+
+const get2daysAgo = () => {
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  return minuitStamp(twoDaysAgo);
+};
+
+export const getToday = () => {
+  return minuitStamp(new Date());
+};
+
+export const before2daysAgo = ts => {
+  return ts < get2daysAgo();
+};

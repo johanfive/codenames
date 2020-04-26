@@ -1,7 +1,7 @@
 html {
   background-color: #f9f9f9;
   color: #535353;
-  font-family: 'Roboto', sans-serif;
+  font-family: sans-serif;
 }
 
 ::selection {
@@ -13,64 +13,43 @@ html {
   border-radius: 2px;
 }
 
-a {
-  margin: 5rem;
+button {
+  border: 0;
+  margin: 0;
+  padding: .3rem 1rem;
+  background-color: #999999;
+  color: white;
+  border-radius: 1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.create {
+  border-radius: 2px;
+}
+a, .create {
+  border: 1px solid #999999;
+  background-color: inherit;
+  color: inherit;
   padding: .5rem;
   text-decoration: none;
 }
-
-button, a {
-  border: 1px solid #999999;
-  background-color: inherit;
-  color: inherit;
-}
-button:hover, a:hover {
+a:hover, .create:hover {
   border: 1px solid #535353;
-  background-color: inherit;
   color: deeppink;
 }
 
-.join {
-  width: 3rem;
-  height: 3rem;
-  border: 0;
-  padding: 1px;
-}
-.join:hover {
-  border: 1px solid #999999;
-}
-
-input {
-  background-color: inherit;
-  border: 0;
-  padding: .25rem;
-  color: inherit;
-  font: inherit;
-  box-sizing: border-box;
-  text-align: center;
-  width: 13.5rem;
-}
-input:hover, input:active {
-  border: 1px solid #999999;
-}
-
-
 .board {
+  display: flex;
+  flex-wrap: wrap;
   width: 41rem;
   height: 41rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-}
-
-.row {
-  display: flex;
-  justify-content: space-evenly;
-  height: 7.5rem;
+  justify-content: space-between;
+  align-content: space-between;
 }
 
 .tile {
-  width: 7.5rem;
+  width: 8rem;
+  height: 8rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -78,29 +57,73 @@ input:hover, input:active {
   box-sizing: border-box;
   letter-spacing: 1px;
   color: white;
-  font-size: 1.2rem;
   font-weight: bolder;
+  cursor: pointer;
 }
 .tile:hover {
-  border: 1px solid black;
-  color: white;
+  border: 2px solid #717272;
 }
 
 .unflipped {
   background-color: #d5d5d5;
 }
+
 .teamA {
-  background-color: #61dafb;
+  background-color: #00539f; /* #61dafb */
+}
+.teamA-transparent {
+  background-color: rgba(0, 83, 159, .3); /* #61dafb */
+  color: black;
+  font-weight: normal;
 }
 .teamB {
-  background-color: crimson;
+  background-color: #d5003a;
+}
+.teamB-transparent {
+  background-color: rgba(213, 0, 58, .3);
+  color: black;
+  font-weight: normal;
 }
 .neutral {
-  background-color: rgb(48, 218, 32);
+  background-color: #efbb29;
+}
+.neutral-transparent {
+  background-color: rgba(239, 187, 41, .3);
+  color: black;
+  font-weight: normal;
 }
 .assassin {
-  background-color: gray;
+  background-color: black; /* #717272 */
 }
-.spy {
-  border: 5px solid orange;
+.assassin-transparent {
+  background-color: rgba(0, 0, 0, .3);
+  color: black;
+  font-weight: normal;
+}
+
+.unflippable {
+  cursor: default;
+}
+.unflippable:hover {
+  border: 0;
+}
+
+.score {
+  font-size: 2rem;
+}
+
+.self-teamA {
+  color: #00539f;
+  font-weight: bolder;
+}
+.self-teamB {
+  color: #d5003a;
+  font-weight: bolder;
+}
+
+.lobbyBlurb {
+  width: 35%;
+}
+.lobbyBlurb li {
+  margin-bottom: 1rem;
 }

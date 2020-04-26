@@ -1,49 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../services/firebase';
-import { teams, ASSASSIN, UNFLIPPED, NEUTRAL } from '../constants';
+import React, { useState, useEffect } from "react";
+import { UNFLIPPED, NEUTRAL } from "../constants";
+import { db } from "../services/firebase";
+import { createVote } from "../dbStuff/setters";
 
 
-const tileInit = { color: UNFLIPPED, value: null, word: 'loading...' };
-
-export default ({ id, gameId, player }) => {
-  const [ state, setState] = useState(tileInit);
-  const { color, value, word } = state;
-  const { team, isMaster } = player;
+const Tile = ({ gameId, id, player, score }) => {
+  const { isCaptain, team } = player;
+  const [ word, setWord ] = useState('Loading...');
+  const [ color, setColor ] = useState(UNFLIPPED);
+  const [ value, setValue ] = useState(null);
+  const tileRef = db.ref(`/activeGames/${gameId}/tiles/${id}`);
 
   useEffect(() => {
-    const tileRef = db.ref(`/activeGames/${gameId}/tiles/${id}`);
-    tileRef.on('value', (snap) => {
-      setState(snap.val());
-    });
-    return () => tileRef.off();
-  }, [gameId, id]);
+    if (gameId && id && word === 'Loading...') {
+      tileRef.child('word').once('value')
+        .then(snap => setWord(snap.val()))
+        .catch(e => console.error(e.message));
+      const handleColorChange = snap => setColor(snap.val());
+      tileRef.child('color').on('value', handleColorChange);
+      return () => tileRef.off('value', handleColorChange);
+    }
+  }, [gameId, id, tileRef, word]);
 
-  const handleClick = () => {
-    if (color === UNFLIPPED && team !== NEUTRAL) {
-      const clickersTeam = team === teams.A ? teams.A : teams.B;
-      const opposingTeam = clickersTeam === teams.A ? teams.B : teams.A;
-      const clickersLose = value === ASSASSIN;
-      const tileRef = db.ref(`/activeGames/${gameId}/tiles/${id}`);
-      tileRef.child('/color').set(value)
-        .then(() => {
-          if (clickersLose) {
-            console.log(opposingTeam + ' wins!'); // TODO
-          }
-        })
-        .catch(e => {
-          console.error(`An error occurred when trying to flip tile "${id}": ${e.message} Try again`);
-        });
+  useEffect(() => {
+    if (gameId && id && isCaptain) {
+      tileRef.child('value').once('value')
+        .then(snap => setValue(snap.val()))
+        .catch(e => console.error(e.message));
+    }
+  }, [gameId, id, tileRef, isCaptain]);
+
+  const flip = () => {
+    if (team !== NEUTRAL && color === UNFLIPPED) {
+      createVote(gameId, id, word, team).catch(e => console.error(e.message));
     }
   };
-
-  const flipped = color === value;
-  const spyClass = flipped ? 'spy' : value;
+  const flipped = color !== UNFLIPPED;
+  const capView = flipped ? value : value + '-transparent';
   return (
-    <div
-      className={`tile ${color} ${isMaster ? spyClass : ''}`}
-      onClick={() => handleClick()}
-    >
-      {word}
+    <div style={{ backgroundColor: 'white' }}>
+      <div
+        className={`tile ${isCaptain ? capView : color} ${flipped && 'unflippable'}`}
+        onClick={flip}
+      >
+        {word}
+      </div>
     </div>
   );
 };
+
+export default Tile;
