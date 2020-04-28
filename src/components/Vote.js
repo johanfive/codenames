@@ -49,7 +49,6 @@ const Vote = ({ gameId, player, score }) => {
     const user = auth().currentUser;
 
     const flip = () => {
-      console.log(`Actually flipping ${tileId} now`);
       flipTile(gameId, tileId, team, score)
         .catch(e => console.error(e.message));
     };

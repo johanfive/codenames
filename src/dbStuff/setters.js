@@ -5,44 +5,29 @@ import { getToday } from "../helpers/data";
 
 const incrementBy1 = current => current ? (current + 1) : 1;
 
-const incrementTeamScore = (gameId, team) => {
-  const teamScoreRef = db.ref(`/activeGames/${gameId}/${team}/score`);
-  return teamScoreRef.transaction(incrementBy1);
+// created
+// won
+// lost
+// teamA
+// (played = won + lost)
+// (teamB = played - teamA)
+const incrementUserStat = stat => {
+  const user = auth().currentUser;
+  return db.ref(`/users/${user.uid}/${stat}`).transaction(incrementBy1);
 };
 
-export const incrementUserGamesCreated = () => {
-  const user = auth().currentUser;
-  return db.ref(`/users/${user.uid}/created`).transaction(incrementBy1);
-};
-// {
-//   created: 0,
-//   won: 0,
-//   lost: 0,
-//   teamA: 0,
-// }
-// played = won + lost
-// teamB = played - teamA
-const incrementUserGamesWon = () => {
-  const user = auth().currentUser;
-  return db.ref(`/users/${user.uid}/won`).transaction(incrementBy1);
-};
-const incrementUserGamesLost = () => {
-  const user = auth().currentUser;
-  return db.ref(`/users/${user.uid}/lost`).transaction(incrementBy1);
-};
-const incrementUserGamesTeamA = () => {
-  const user = auth().currentUser;
-  return db.ref(`/users/${user.uid}/teamA`).transaction(incrementBy1);
-};
-const setUserResults = (win) => win ? incrementUserGamesWon() : incrementUserGamesLost();
+export const incrementUserGamesCreated = () => incrementUserStat('created');
+
 // Only call for non-audience members
 export const setUserStats = (win, team) => {
-  return setUserResults(win).then(() => {
-    if (team === teams.A) {
-      return incrementUserGamesTeamA();
+  return incrementUserStat(win ? 'won' : 'lost').then((transactionResult) => {
+    if (transactionResult.committed) {
+      if (team === teams.A) {
+        return incrementUserStat('teamA');
+      }
     }
   });
-}
+};
 
 export const authUserJoinsGame = (gameId) => {
   const user = auth().currentUser;
@@ -88,6 +73,11 @@ const pushToInactiveGames = gameId => {
   return db.ref(`/inactiveGames/${getToday()}`).push(gameId);
 };
 
+const incrementTeamScore = (gameId, team) => {
+  const teamScoreRef = db.ref(`/activeGames/${gameId}/${team}/score`);
+  return teamScoreRef.transaction(incrementBy1);
+};
+
 export const flipTile = (gameId, tileId, clickingTeam, score) => {
   const gameRef = db.ref(`/activeGames/${gameId}`);
   const tileRef = gameRef.child(`/tiles/${tileId}`);
@@ -104,7 +94,7 @@ export const flipTile = (gameId, tileId, clickingTeam, score) => {
   })
   .then(() => {
     if (scoringTeam === ASSASSIN) {
-      console.log(`${clickingTeam} walks on the mine Bye ${clickingTeam}!`);
+      console.log(`${clickingTeam} walks on the mine. Bye ${clickingTeam}!`);
       return db.ref(`/activeGames/${gameId}/mine`).set(clickingTeam)
         .then(() => pushToInactiveGames(gameId));
     } else if (scoringTeam !== NEUTRAL) {

@@ -27,9 +27,7 @@ export default () => {
         const updates = {};
         snap.forEach(daySnap => {
           const ts = daySnap.key;
-          console.log(`TS: ${ts}`);
           if (before2daysAgo(ts)) {
-            console.log('before2days ago');
             const day = daySnap.val();
             const gameIds = Object.keys(day).map(deletable => day[deletable]);
             gameIds.forEach(gameToDelete => {

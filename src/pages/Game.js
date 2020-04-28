@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { NEUTRAL, teams, scoreToWin, colors } from '../constants';
-import { onUserChange, onMineChange, onTeamScoreChange } from '../dbStuff/listeners';
-import { handleUserChange, handleMineChange, makeHandler } from '../dbStuff/handlers';
+import { onUserChange, onMineChange, onTeamScoreChange, onTilesRemoved } from '../dbStuff/listeners';
 import { getTilesIds } from '../dbStuff/getters';
 import Team from '../components/Team';
 import Tile from '../components/Tile';
 import Timer from '../components/Timer';
 import Vote from '../components/Vote';
+import { setUserStats } from '../dbStuff/setters';
 
 
 const Board = ({ gameId, tilesIds, player, score }) => {
@@ -27,6 +27,7 @@ export default () => {
   const [ teamAScore, setTeamAScore ] = useState(0);
   const [ teamBScore, setTeamBScore ] = useState(0);
 
+  const { team } = player;
   const { gameId } = useParams();
   const history = useHistory();
 
@@ -42,30 +43,21 @@ export default () => {
       .catch(e => console.error(e));
   }, [gameId, history]);
 
-  useEffect(() => {
-    const forgetUser = onUserChange(gameId, handleUserChange(setPlayer, gameId));
-    return () => forgetUser();
-  }, [gameId]);
-
-  useEffect(() => {
-    const forgetMineTeam = onMineChange(gameId, handleMineChange(setWinners));
-    const forgetTeamAScore = onTeamScoreChange(gameId, teams.A, makeHandler(setTeamAScore));
-    const forgetTeamBScore = onTeamScoreChange(gameId, teams.B, makeHandler(setTeamBScore));
-    return () => {
-      forgetMineTeam();
-      forgetTeamAScore();
-      forgetTeamBScore();
-    };
-  }, [gameId]);
-
+  useEffect(() => onTilesRemoved(gameId, history), [gameId, history]);
+  useEffect(() => onUserChange(gameId, setPlayer), [gameId]);
+  useEffect(() => onMineChange(gameId, setWinners), [gameId]);
+  useEffect(() => onTeamScoreChange(gameId, teams.A, setTeamAScore), [gameId]);
+  useEffect(() => onTeamScoreChange(gameId, teams.B, setTeamBScore), [gameId]);
   useEffect(() => {
     if (teamAScore === scoreToWin[teams.A]) {
       setWinners(teams.A);
     }
+  }, [teamAScore]);
+  useEffect(() => {
     if (teamBScore === scoreToWin[teams.B]) {
       setWinners(teams.B);
     }
-  }, [teamAScore, teamBScore]);
+  }, [teamBScore]);
 
   useEffect(() => {
     if (winners && !player.isCaptain) {
@@ -73,6 +65,15 @@ export default () => {
       setPlayer({ ...player, isCaptain: true });
     }
   }, [winners, player]);
+
+  useEffect(() => {
+    if (winners) {
+      if (team !== NEUTRAL) {
+        const win = team === winners;
+        setUserStats(win, team).catch(e => console.error(e.message));
+      }
+    }
+  }, [winners, team]);
 
   const copy = () => {
     navigator.clipboard.writeText(window.location.href)

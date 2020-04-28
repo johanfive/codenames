@@ -1,45 +1,55 @@
 import { db, auth } from "../services/firebase";
+import { teams } from "../constants";
+import { authUserJoinsGame } from "./setters";
 
 
-export const onTileChange = (gameId, tileId, handleTileChange) => {
-  const tileRef = db.ref(`/activeGames/${gameId}/tile/${tileId}`);
-  tileRef.on('value', handleTileChange);
-  return () => tileRef.off('value', handleTileChange);
-};
-
-export const onUserChange = (gameId, handleUserChange) => {
+export const onUserChange = (gameId, setState) => {
   const user = auth().currentUser;
   const userRef = db.ref(`activeGames/${gameId}/users/${user.uid}`);
+  const handleUserChange = snap => {
+    if (snap.exists()) {
+      setState(snap.val());
+    } else {
+      authUserJoinsGame(gameId).catch(e => console.error(e.message));
+    }
+  };
   userRef.on('value', handleUserChange);
   return () => userRef.off('value', handleUserChange);
 };
 
-export const onTeamScoreChange = (gameId, team, handleTeamScoreChange) => {
+export const onTeamScoreChange = (gameId, team, setState) => {
   const tileRef = db.ref(`/activeGames/${gameId}/${team}/score`);
+  const handleTeamScoreChange = snap => {
+    if (snap.exists()) {
+      setState(snap.val());
+    }
+  };
   tileRef.on('value', handleTeamScoreChange);
   return () => tileRef.off('value', handleTeamScoreChange);
 };
 
-export const onTeamNameChange = (gameId, team, handleTeamNameChange) => {
-  const teamNameRef = db.ref(`/activeGames/${gameId}/${team}/name`);
-  teamNameRef.on('value', handleTeamNameChange);
-  return () => teamNameRef.off('value', handleTeamNameChange);
-};
-
-export const onTeamMembersChange = (gameId, team, handleTeamMembersChange) => {
-  const teamMembersRef = db.ref(`/activeGames/${gameId}/${team}/members`);
-  teamMembersRef.on('value', handleTeamMembersChange);
-  return () => teamMembersRef.off('value', handleTeamMembersChange);
-};
-
-export const onTeamCaptainChange = (gameId, team, handleTeamCaptainChange) => {
-  const teamCaptainRef = db.ref(`/activeGames/${gameId}/${team}/captain`);
-  teamCaptainRef.on('value', handleTeamCaptainChange);
-  return () => teamCaptainRef.off('value', handleTeamCaptainChange);
-};
-
-export const onMineChange = (gameId, handleMineChange) => {
+export const onMineChange = (gameId, setState) => {
   const mineRef = db.ref(`/activeGames/${gameId}/mine`);
+  const handleMineChange = snap => {
+    if (snap.exists()) {
+      const winningTeam = snap.val() === teams.A ? teams.B : teams.A;
+      setState(winningTeam);
+    }
+  };
   mineRef.on('value', handleMineChange);
   return () => mineRef.off('value', handleMineChange);
+};
+
+export const onTilesRemoved = (gameId, history) => {
+  const redirect = () => history.push('/');
+  const gameRef = db.ref(`/activeGames/${gameId}/tiles`);
+  gameRef.on('child_removed', redirect);
+  return () => gameRef.off('child_removed', redirect);
+};
+
+export const onTileColorChange = (gameId, tileId, setState) => {
+  const tileColorRef = db.ref(`/activeGames/${gameId}/tiles/${tileId}/color`);
+  const handleColorChange = snap => setState(snap.val());
+  tileColorRef.on('value', handleColorChange);
+  return () => tileColorRef.off('value', handleColorChange);
 };
