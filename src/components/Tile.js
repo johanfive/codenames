@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { UNFLIPPED, NEUTRAL } from "../constants";
-import { db } from "../services/firebase";
-import { createVote } from "../dbStuff/setters";
-import { onTileColorChange } from "../dbStuff/listeners";
+/* eslint-disable react/prop-types */
+import React, { useState, useEffect } from 'react';
+import { UNFLIPPED, NEUTRAL } from '../constants';
+import { db } from '../services/firebase';
+import { createVote } from '../dbStuff/setters';
+import { onTileColorChange } from '../dbStuff/listeners';
 
 
 const Tile = ({ gameId, id, player }) => {

@@ -1,5 +1,5 @@
 import words from './words';
-import { teams, scoreToWin, ASSASSIN, UNFLIPPED, NEUTRAL } from '../constants';
+import { teams, scoreToWin, MINE, UNFLIPPED, NEUTRAL } from '../constants';
 
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max));
@@ -11,7 +11,7 @@ const contains = (val, values) => {
     }
   }
   return false;
-}
+};
 
 const getUnselectedRandom = (selection, max) => {
   const i = getRandomInt(max);
@@ -19,21 +19,21 @@ const getUnselectedRandom = (selection, max) => {
     return getUnselectedRandom(selection, max);
   }
   return i;
-}
+};
 
 export const shuffleTiles = (tilesCount) => {
   const tiles = [];
-  const assassinId = getRandomInt(tilesCount); // ass placed differently because it would almost always be on the 1st row otherwise
+  const mineId = getRandomInt(tilesCount); // ass placed differently because it would almost always be on the 1st row otherwise
   const toDistribute = {
-    values: [teams.A, teams.B, NEUTRAL], // these guys have similar enough odds that this strategy makes sense
+    [NEUTRAL]: 7,
     [teams.A]: scoreToWin[teams.A],
     [teams.B]: scoreToWin[teams.B],
-    [NEUTRAL]: 7
+    values: [teams.A, teams.B, NEUTRAL] // these guys have similar enough odds that this strategy makes sense
   };
   for (let i = 0; i < tilesCount; i++) {
     const wordIndex = getUnselectedRandom(tiles.map(tile => tile.id), words.length);
-    const tileValue = i === assassinId
-      ? ASSASSIN
+    const tileValue = i === mineId
+      ? MINE
       : toDistribute.values[getRandomInt(toDistribute.values.length)];
     if (toDistribute[tileValue] > 0) {
       toDistribute[tileValue]--;
@@ -41,9 +41,9 @@ export const shuffleTiles = (tilesCount) => {
     if (toDistribute[tileValue] === 0) {
       toDistribute.values = toDistribute.values.filter(val => val !== tileValue);
     }
-    tiles.push({ id: wordIndex , word: words[wordIndex], value: tileValue });
+    tiles.push({ id: wordIndex, value: tileValue, word: words[wordIndex] });
   }
-  return tiles.map(tile => ({ word: tile.word, value: tile.value, color: UNFLIPPED }));
+  return tiles.map(tile => ({ color: UNFLIPPED, value: tile.value, word: tile.word }));
 };
 
 export const arraysOfSameValues = (arrA, arrB) => {
@@ -58,7 +58,7 @@ export const arraysOfSameValues = (arrA, arrB) => {
     }
   }
   return true;
-}
+};
 
 const minuitStamp = dateObj => {
   dateObj.setHours(0);

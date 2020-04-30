@@ -11,7 +11,7 @@ const displayTime = (millis) => {
     : minutes + ':' + (displaySeconds < 10 ? `0${displaySeconds}` : displaySeconds);
 };
 
-export default () => {
+const Timer = () => {
   const DEFAULT = 3 * 60 * 1000;
   const [time, setTime] = useState(DEFAULT);
   const [ run, setRun ] = useState(false);
@@ -51,13 +51,13 @@ export default () => {
     }
   };
   return (
-    <div style={{ 
-      margin: '1rem',
-      padding: '.5rem',
-      width: '20rem',
+    <div style={{
+      alignItems: 'center',
       display: 'flex',
       justifyContent: 'space-evenly',
-      alignItems: 'center'
+      margin: '1rem',
+      padding: '.5rem',
+      width: '20rem'
     }}>
       <button onClick={reset}>Reset</button>
       <button onClick={decrease}>-</button>
@@ -69,3 +69,5 @@ export default () => {
     </div>
   );
 };
+
+export default Timer;

@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { db, auth } from "../services/firebase";
-import { arraysOfSameValues } from "../helpers/data";
-import { userJoinsTeam } from "../dbStuff/setters";
-import { NEUTRAL, scoreToWin, teamNames, colors, teams } from "../constants";
-import Captain from "./Captain";
+/* eslint-disable react/prop-types */
+import React, { useState, useEffect } from 'react';
+import { db, auth } from '../services/firebase';
+import { arraysOfSameValues } from '../helpers/data';
+import { userJoinsTeam } from '../dbStuff/setters';
+import { NEUTRAL, scoreToWin, teamNames, colors, teams } from '../constants';
+import Captain from './Captain';
 
 
 const buttonStyle = team => ({
-  margin: '1rem auto',
-  padding: '.5rem 1.5rem',
   backgroundColor: colors[team],
-  color: 'white',
   borderRadius: '1rem',
-  letterSpacing: '1px'
+  color: 'white',
+  letterSpacing: '1px',
+  margin: '1rem auto',
+  padding: '.5rem 1.5rem'
 });
 
-const TeamColor = ({team, text}) => <span style={{ color: colors[team] }}>{text}</span>
+const TeamColor = ({team, text}) => <span style={{ color: colors[team] }}>{text}</span>;
 
 
 const Team = ({ team, gameId, player, score }) => {
@@ -50,10 +51,10 @@ const Team = ({ team, gameId, player, score }) => {
   const isSelf = playerKey => playerKey === user.uid;
   return (
     <div style={{
-      textAlign: `${team === teams.B ? 'left' : 'right'}`,
-      width: '16rem',
+      overflow: 'auto',
       padding: '2rem 1rem 0',
-      overflow: 'auto'
+      textAlign: `${team === teams.B ? 'left' : 'right'}`,
+      width: '16rem'
     }}>
       {team !== NEUTRAL && (
         <div className="score">

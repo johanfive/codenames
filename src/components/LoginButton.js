@@ -1,10 +1,11 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import { signinWithGoogle } from '../helpers/auth';
 
 
-export default ({ authed }) => {
+const LoginButton = ({ authed }) => {
   const history = useHistory();
   const { location } = history;
 
@@ -24,4 +25,6 @@ export default ({ authed }) => {
   return authed
     ? <button onClick={handleLogOut}>Log Out</button>
     : <button style={{ padding: '.5rem' }} onClick={handleLogIn}>Log In</button>;
-}
+};
+
+export default LoginButton;

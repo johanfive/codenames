@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { NEUTRAL, teams, scoreToWin, colors } from '../constants';
@@ -21,7 +22,7 @@ const Board = ({ gameId, tilesIds, player, score }) => {
 export default () => {
   const [ tilesIds, setTilesIds ] = useState([]);
   const [ player, setPlayer ] = useState({
-    team: NEUTRAL, isCaptain: false, displayName: 'Cap Annonymous'
+    displayName: 'Cap Annonymous', isCaptain: false, team: NEUTRAL
   });
   const [ winners, setWinners ] = useState(null);
   const [ teamAScore, setTeamAScore ] = useState(0);
@@ -37,7 +38,7 @@ export default () => {
         if (snap.exists()) {
           setTilesIds(Object.keys(snap.val()));
         } else {
-          history.push(`/`);
+          history.push('/');
         }
       })
       .catch(e => console.error(e));
@@ -77,24 +78,24 @@ export default () => {
 
   const copy = () => {
     navigator.clipboard.writeText(window.location.href)
-    .then(() => {
-      console.log('URL copied to clipboard');
-    })
-    .catch(e => {
-      console.error('Could not copy URL', e);
-    });
-  }
+      .then(() => {
+        console.log('URL copied to clipboard');
+      })
+      .catch(e => {
+        console.error('Could not copy URL', e);
+      });
+  };
 
   return (
     <div>
       <h1>C L U E F U L {winners && <span style={{ color: colors[winners]}}>Winners: {winners}</span>}</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-evenly' }}>
         <div><Link to="/">Lobby</Link></div>
         <div><button onClick={copy}>Get Invite Link</button></div>
         <Timer />
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', width: '36rem', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', width: '36rem' }}>
           <Team team={teams.A} gameId={gameId} player={player} score={teamAScore} />
           <Team team={teams.B} gameId={gameId} player={player} score={teamBScore} />
           <Team team={NEUTRAL} gameId={gameId} player={player} />

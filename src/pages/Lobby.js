@@ -7,14 +7,14 @@ import { incrementUserGamesCreated } from '../dbStuff/setters';
 
 
 export default () => {
-  const [ state, setState ] = useState({ loading: false, error: null });
+  const [ state, setState ] = useState({ error: null, loading: false });
   const history = useHistory();
   const user = auth().currentUser;
 
   const joinGame = gameId => history.push(`/game/${gameId}`);
 
   const handleCreate = () => {
-    setState({ loading: true, error: null });
+    setState({ error: null, loading: true });
     const newGameRef = db.ref().child('activeGames').push();
     const gameId = newGameRef.key;
     const newGame = {};
@@ -29,8 +29,8 @@ export default () => {
           const ts = daySnap.key;
           if (before2daysAgo(ts)) {
             const day = daySnap.val();
-            const gameIds = Object.keys(day).map(deletable => day[deletable]);
-            gameIds.forEach(gameToDelete => {
+            const deletables = Object.keys(day);
+            deletables.forEach(gameToDelete => {
               updates[`/activeGames/${gameToDelete}`] = null;
             });
             updates[`/inactiveGames/${ts}`] = null;
@@ -43,24 +43,24 @@ export default () => {
       updates['/tiles'] = newGame;
       updates[`/${teams.A}/name`] = teamNames[teams.A];
       updates[`/${teams.B}/name`] = teamNames[teams.B];
-      updates[`/${NEUTRAL}`] = { name: teamNames[NEUTRAL], members: { [user.uid]: user.displayName || 'Cap Annonymous' } };
+      updates[`/${NEUTRAL}`] = { members: { [user.uid]: user.displayName || 'Cap Annonymous' }, name: teamNames[NEUTRAL] };
       updates[`/users/${user.uid}`] = { ...defaultPlayer, displayName: user.displayName };
       return newGameRef.update(updates);
     }).then(incrementUserGamesCreated)
       .then(() => joinGame(gameId))
       .catch(e => {
-        setState({ loading: false, error: e.message });
+        setState({ error: e.message, loading: false });
       });
-  }
+  };
 
   const { loading, error } = state;
 
   return (
     <div style={{
+      alignItems: 'center',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-evenly',
-      alignItems: 'center',
       padding: '1rem'
     }}>
       <h1>Hi {user.displayName}!</h1>
@@ -74,7 +74,7 @@ export default () => {
         </li>
         <li>Have fun!</li>
       </ol>
-      {loading ? 'Loading...' : <button className="create" style={{ width: '5rem', height: '5rem' }} onClick={handleCreate}>Create New</button>}
+      {loading ? 'Loading...' : <button className="create" style={{ height: '5rem', width: '5rem' }} onClick={handleCreate}>Create New</button>}
       {error}
     </div>
   );

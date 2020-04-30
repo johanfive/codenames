@@ -1,6 +1,6 @@
-import { db, auth } from "../services/firebase";
-import { teams } from "../constants";
-import { authUserJoinsGame } from "./setters";
+import { db, auth } from '../services/firebase';
+import { teams } from '../constants';
+import { authUserJoinsGame } from './setters';
 
 
 export const onUserChange = (gameId, setState) => {

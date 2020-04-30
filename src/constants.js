@@ -3,7 +3,7 @@ export const teams = {
   B: 'teamB'
 };
 
-export const ASSASSIN = 'assassin';
+export const MINE = 'mine';
 export const NEUTRAL = 'neutral';
 export const UNFLIPPED = 'unflipped';
 

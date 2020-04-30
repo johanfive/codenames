@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { db } from '../services/firebase';
@@ -6,15 +7,15 @@ import { colors } from '../constants';
 
 
 const buttonStyle = team => ({
-  margin: '1rem auto',
-  padding: '.5rem 1.5rem',
   backgroundColor: colors[team],
-  color: 'white',
   borderRadius: '1rem',
-  letterSpacing: '1px'
+  color: 'white',
+  letterSpacing: '1px',
+  margin: '1rem auto',
+  padding: '.5rem 1.5rem'
 });
 
-const TeamColor = ({team, text}) => <span style={{ display: 'inline-block', border: '1px solid #717272', padding: '.5rem', marginTop: '5px', color: colors[team] }}>{text}</span>;
+const TeamColor = ({team, text}) => <span style={{ border: '1px solid #717272', color: colors[team], display: 'inline-block', marginTop: '5px', padding: '.5rem' }}>{text}</span>;
 
 const Captain = ({ gameId, team, player }) => {
   const [ teamCaptain, setCaptain ] = useState(null);
@@ -24,7 +25,7 @@ const Captain = ({ gameId, team, player }) => {
       if (snap.exists()) {
         setCaptain(snap.val());
       }
-    }
+    };
     capRef.on('value', handleCapChange);
     return () => capRef.off('value', handleCapChange);
   }, [capRef]);

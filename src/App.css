@@ -92,10 +92,10 @@ a:hover, .create:hover {
   color: black;
   font-weight: normal;
 }
-.assassin {
+.mine {
   background-color: black; /* #717272 */
 }
-.assassin-transparent {
+.mine-transparent {
   background-color: rgba(0, 0, 0, .3);
   color: black;
   font-weight: normal;

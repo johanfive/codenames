@@ -1,6 +1,6 @@
-import { db, auth } from "../services/firebase";
-import { NEUTRAL, defaultPlayer, teams, ASSASSIN, scoreToWin } from "../constants";
-import { getToday } from "../helpers/data";
+import { db, auth } from '../services/firebase';
+import { NEUTRAL, defaultPlayer, teams, MINE, scoreToWin } from '../constants';
+import { getToday } from '../helpers/data';
 
 
 const incrementBy1 = current => current ? (current + 1) : 1;
@@ -46,8 +46,8 @@ export const userJoinsTeam = (gameId, teamToJoin, currentTeam) => {
   updates[`/${teamToJoin}/members/${user.uid}`] = user.displayName;
   updates[`/users/${user.uid}/team`] = teamToJoin;
   if (currentTeam !== NEUTRAL) {
-    updates[`/vote`] = null;
-    updates[`/inFavor`] = null;
+    updates['/vote'] = null;
+    updates['/inFavor'] = null;
   }
   return gameRef.update(updates);
 };
@@ -69,8 +69,8 @@ export const userBecomesCaptain = (gameId, team) => {
   });
 };
 
-const pushToInactiveGames = gameId => {
-  return db.ref(`/inactiveGames/${getToday()}`).push(gameId);
+const setGameAsInactive = gameId => {
+  return db.ref(`/inactiveGames/${getToday()}/${gameId}`).set(true);
 };
 
 const incrementTeamScore = (gameId, team) => {
@@ -80,44 +80,44 @@ const incrementTeamScore = (gameId, team) => {
 
 export const flipTile = (gameId, tileId, clickingTeam, score) => {
   const gameRef = db.ref(`/activeGames/${gameId}`);
-  const tileRef = gameRef.child(`/tiles/${tileId}`);
+  const tileValueRef = gameRef.child(`/tiles/${tileId}/value`);
   let scoringTeam = null;
-  return tileRef.child('value').once('value')
-  .then(snap => snap.val())
-  .then(tileValue => {
-    scoringTeam = tileValue;
-    const updates = {};
-    updates[`/vote`] = null;
-    updates[`/inFavor`] = null;
-    updates[`/tiles/${tileId}/color`] = scoringTeam;
-    return gameRef.update(updates);
-  })
-  .then(() => {
-    if (scoringTeam === ASSASSIN) {
-      console.log(`${clickingTeam} walks on the mine. Bye ${clickingTeam}!`);
-      return db.ref(`/activeGames/${gameId}/mine`).set(clickingTeam)
-        .then(() => pushToInactiveGames(gameId));
-    } else if (scoringTeam !== NEUTRAL) {
-      const endGame = score[scoringTeam] === (scoreToWin[scoringTeam] - 1);
-      return incrementTeamScore(gameId, scoringTeam)
-        .then(transactionResult => {
-          if (transactionResult.committed && endGame) {
-            return pushToInactiveGames(gameId);
-          }
-        });
-    }
-  });
+  return tileValueRef.once('value')
+    .then(snap => snap.val())
+    .then(tileValue => {
+      scoringTeam = tileValue;
+      const updates = {};
+      updates['/vote'] = null;
+      updates['/inFavor'] = null;
+      updates[`/tiles/${tileId}/color`] = scoringTeam;
+      return gameRef.update(updates);
+    })
+    .then(() => {
+      if (scoringTeam === MINE) {
+        console.log(`${clickingTeam} walks on the mine. Bye ${clickingTeam}!`);
+        return gameRef.child('mine').set(clickingTeam)
+          .then(() => setGameAsInactive(gameId));
+      } else if (scoringTeam !== NEUTRAL) {
+        const endGame = score[scoringTeam] === (scoreToWin[scoringTeam] - 1);
+        return incrementTeamScore(gameId, scoringTeam)
+          .then(transactionResult => {
+            if (transactionResult.committed && endGame) {
+              return setGameAsInactive(gameId);
+            }
+          });
+      }
+    });
 };
 
 export const createVote = (gameId, tileId, word, team) => {
   const user = auth().currentUser;
   const vote = {
-    team,
-    tileId,
-    word,
     clicker: {
       [user.uid]: user.displayName
-    }
+    },
+    team,
+    tileId,
+    word
   };
   const sameTeamDifferentWord = currentVote => team === currentVote.team && word !== currentVote.word;
   return db.ref(`/activeGames/${gameId}/vote`).transaction(currentVote => {
@@ -129,7 +129,7 @@ export const createVote = (gameId, tileId, word, team) => {
 
 export const cancelVote = (gameId) => {
   const updates = {};
-  updates[`/vote`] = null;
-  updates[`/inFavor`] = null;
+  updates['/vote'] = null;
+  updates['/inFavor'] = null;
   return db.ref(`/activeGames/${gameId}`).update(updates);
 };

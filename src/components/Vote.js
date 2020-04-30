@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../services/firebase';
 import { arraysOfSameValues } from '../helpers/data';
@@ -63,7 +64,7 @@ const Vote = ({ gameId, player, score }) => {
         .catch(e => console.error(e.message));
     };
     const cancel = () => cancelVote(gameId).catch(e => console.error(e.message));
- 
+
     const thoseInFavor = Object.keys(inFavor);
     const isClicker = user.uid === clickerId;
     const flippable = thoseInFavor && thoseInFavor.length > 0;
@@ -71,10 +72,10 @@ const Vote = ({ gameId, player, score }) => {
     return (
       <div style={{
         border: `1px solid ${colors[team]}`,
-        width: '14rem',
         marginRight: '1rem',
+        overflow: 'auto',
         padding: '2rem 1rem 0',
-        overflow: 'auto'
+        width: '14rem'
       }}>
         <div><span style={{ color: colors[team] }}>{clicker[clickerId]}</span> wants to flip <b>{word}</b></div>
         <ul style={{ listStyle: 'none', padding: '0' }}>

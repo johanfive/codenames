@@ -1,8 +1,9 @@
+/* eslint-disable react/prop-types */
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 
-export default ({ authed }) => {  
+const Login = ({ authed }) => {
   const history = useHistory();
   const { location } = history;
   const { state = {} } = location;
@@ -22,3 +23,5 @@ export default ({ authed }) => {
     </div>
   );
 };
+
+export default Login;
