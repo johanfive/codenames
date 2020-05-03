@@ -68,7 +68,7 @@ const Vote = ({ gameId, player, score }) => {
     const thoseInFavor = Object.keys(inFavor);
     const isClicker = user.uid === clickerId;
     const flippable = thoseInFavor && thoseInFavor.length > 0;
-    const canVote = player.team === team && !isClicker && (!inFavor[user.uid]);
+    const canVote = !player.isCaptain && player.team === team && !isClicker && (!inFavor[user.uid]);
     return (
       <div style={{
         border: `1px solid ${colors[team]}`,
@@ -82,15 +82,16 @@ const Vote = ({ gameId, player, score }) => {
           {thoseInFavor.map((voter, i) => (
             <li key={i}>
               <span style={{ color: colors[team] }}>{inFavor[voter]}</span> agrees
-              {voter === user.uid && <button onClick={disagree} style={{ marginLeft: '.5rem' }}>DISAGREE</button>}
             </li>
           ))}
         </ul>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {canVote && <button onClick={agree}>AGREE</button>}
+          {inFavor[user.uid] && <button onClick={disagree}>DISAGREE</button>}
           {flippable && isClicker && <button onClick={flip}>FLIP</button>}
           {isClicker && <button onClick={cancel}>CANCEL</button>}
         </div>
+        <div className='info'>Captains can only <b>initiate</b> votes</div>
       </div>
     );
   }

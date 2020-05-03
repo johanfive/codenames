@@ -127,3 +127,8 @@ a:hover, .create:hover {
 .lobbyBlurb li {
   margin-bottom: 1rem;
 }
+
+.info {
+  margin-top: .5rem;
+  color: #d5d5d5;
+}
