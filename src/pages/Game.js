@@ -92,7 +92,7 @@ export default () => {
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-evenly' }}>
         <div><Link to="/">Lobby</Link></div>
         <div><button onClick={copy}>Get Invite Link</button></div>
-        <Timer />
+        <Timer gameId={gameId} />
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', width: '36rem' }}>
