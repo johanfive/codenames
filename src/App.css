@@ -120,6 +120,9 @@ a:hover, .create:hover {
   color: #d5003a;
   font-weight: bolder;
 }
+.self-neutral {
+  font-weight: bolder;
+}
 
 .lobbyBlurb {
   width: 35%;

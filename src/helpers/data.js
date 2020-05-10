@@ -46,20 +46,6 @@ export const shuffleTiles = (tilesCount) => {
   return tiles.map(tile => ({ color: UNFLIPPED, value: tile.value, word: tile.word }));
 };
 
-export const arraysOfSameValues = (arrA, arrB) => {
-  if (!Array.isArray(arrA) || ! Array.isArray(arrB) || arrA.length !== arrB.length) {
-    return false;
-  }
-  const arr1 = arrA.concat().sort();
-  const arr2 = arrB.concat().sort();
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) {
-      return false;
-    }
-  }
-  return true;
-};
-
 export const equalObj = (a, b) => {
   if ((a && !b) || (!a && b)) {
     return false;
