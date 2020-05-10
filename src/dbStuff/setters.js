@@ -119,17 +119,12 @@ export const createVote = (gameId, tileId, word, team) => {
     tileId,
     word
   };
-  const sameTeamDifferentWord = currentVote => team === currentVote.team && word !== currentVote.word;
-  return db.ref(`/activeGames/${gameId}/vote`).transaction(currentVote => {
-    if (!currentVote || sameTeamDifferentWord(currentVote)) {
-      return vote;
+  const gameRef = db.ref(`/activeGames/${gameId}`);
+  return gameRef.child('vote').transaction(() => {
+    return vote;
+  }).then((transactionResult) => {
+    if (transactionResult.committed) {
+      return gameRef.child('inFavor').set(null);
     }
   });
-};
-
-export const cancelVote = (gameId) => {
-  const updates = {};
-  updates['/vote'] = null;
-  updates['/inFavor'] = null;
-  return db.ref(`/activeGames/${gameId}`).update(updates);
 };

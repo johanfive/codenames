@@ -60,6 +60,33 @@ export const arraysOfSameValues = (arrA, arrB) => {
   return true;
 };
 
+export const equalObj = (a, b) => {
+  if ((a && !b) || (!a && b)) {
+    return false;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  } else if (typeof a === 'object' && a !== null) {
+    const aKeys = Object.keys(a).sort();
+    const bKeys = Object.keys(b).sort();
+    if (aKeys.length !== bKeys.length) {
+      return false;
+    }
+    for (let i = 0; i < aKeys.length; i++) {
+      const aKey = aKeys[i];
+      const aVal = a[aKey];
+      const bKey = bKeys[i];
+      const bVal = b[bKey];
+      if (aKey !== bKey || !equalObj(aVal, bVal)) {
+        return false;
+      }
+    }
+  } else if (a !== b) {
+    return false;
+  }
+  return true;
+};
+
 const minuitStamp = dateObj => {
   dateObj.setHours(0);
   dateObj.setMinutes(0);
