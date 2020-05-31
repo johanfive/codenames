@@ -88,8 +88,8 @@ export default () => {
 
   return (
     <div>
-      <h1>C L U E F U L {winners && <span style={{ color: colors[winners]}}>Winners: {winners}</span>}</h1>
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-evenly' }}>
+      <h1 style={{ paddingLeft: '1rem' }}>C L U E F U L {winners && <span style={{ color: colors[winners]}}>Winners: {winners}</span>}</h1>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-evenly', maxWidth: '79rem' }}>
         <div><Link to="/">Lobby</Link></div>
         <div><button onClick={copy}>Get Invite Link</button></div>
         <Timer gameId={gameId} />

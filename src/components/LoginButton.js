@@ -5,6 +5,8 @@ import { auth } from '../services/firebase';
 import { signinWithGoogle } from '../helpers/auth';
 
 
+const loginStyle = { margin: '.5rem', padding: '.5rem' };
+
 const LoginButton = ({ authed }) => {
   const history = useHistory();
   const { location } = history;
@@ -23,8 +25,8 @@ const LoginButton = ({ authed }) => {
     .catch(console.error);
 
   return authed
-    ? <button onClick={handleLogOut}>Log Out</button>
-    : <button style={{ padding: '.5rem' }} onClick={handleLogIn}>Log In</button>;
+    ? <button style={loginStyle} onClick={handleLogOut}>Log Out</button>
+    : <button style={loginStyle} onClick={handleLogIn}>Log In</button>;
 };
 
 export default LoginButton;

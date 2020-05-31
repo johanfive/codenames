@@ -16,7 +16,13 @@ const Login = ({ authed }) => {
   }, [authed, history, state]);
 
   return (
-    <div>
+    <div style={{
+      alignItems: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-evenly',
+      padding: '1rem'
+    }}>
       <h1>C L U E F U L</h1>
       <p>Because being clueless is just awful ¯\_(ツ)_/¯</p>
       {fromGame && <div>You will be redirected once you have logged in</div>}
